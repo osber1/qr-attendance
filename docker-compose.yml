@@ -1,0 +1,32 @@
+version: '2.2'
+
+services:
+  db:
+    image: mysql:8.0.16
+    container_name: database
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+    mem_limit: 512m
+    restart: unless-stopped
+
+  attendance-service:
+    image: 477288567785.dkr.ecr.us-east-2.amazonaws.com/qr-attendance:1.0-SNAPSHOT
+    container_name: qr-attendance
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_TOMCAT_MAX_ACTIVE=2
+      - SPRING_DATASOURCE_TOMCAT_MAX_IDLE=1
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/qr_attendance?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true&useUnicode=true&createDatabaseIfNotExist=true&characterEncoding=utf8&serverTimezone=Europe/Vilnius
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+    mem_limit: 256m
+    restart: unless-stopped
+    depends_on:
+      - db
